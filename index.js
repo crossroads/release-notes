@@ -43,11 +43,9 @@ const question = (text, defaultAnswer, opts = {}) => new Promise((done) => {
 // -------------------------------
 
 async function generateMarkdown() {
-  const upToDate = await question("Are the local live and master branches up to date? Y/n: ", 'Y');
+  info('Running git fetch')
 
-  if (upToDate !== 'y' && upToDate !== 'Y') {
-    return process.exit(0);
-  }
+  execSync(`git fetch`);
 
   info('Reading unreleased commits');
 
