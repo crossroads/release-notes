@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 
+process.env.DEBUG = '*';
+
 const _             = require('lodash');
 const JiraClient    = require('jira-client');
 const { execSync }  = require('child_process');
 const readline      = require('readline');
 const { Writable }  = require('stream');
+const info          = require('debug')('goodcity');
+const notify        = require('debug')('input');
+const error         = require('debug')('error');
 
 // -------------------------------
 // -- Input Helpers
@@ -25,7 +30,7 @@ const rl = readline.createInterface({
 
 const question = (text, defaultAnswer, opts = {}) => new Promise((done) => {
   mutableStdout.muted = _.get(opts, 'muted', false);
-  console.log(`--> ${text}`);
+  notify(`[please answer] ${text}`);
   rl.question('', (answer) => {
     mutableStdout.muted = false;
     done(answer || defaultAnswer)
@@ -44,7 +49,7 @@ async function generateMarkdown() {
     return process.exit(0);
   }
 
-  // Fetch all the commits between MASTER and LIVE
+  info('Reading unreleased commits');
 
   const logs = execSync(`
     git --no-pager log \
@@ -62,6 +67,13 @@ async function generateMarkdown() {
     .map(str => /(GCW-\d+)/.exec(str)[1])
     .uniq()
     .value();
+
+  if (!tickets.length) {
+    info('No JIRA ticket information found');
+    process.exit(0);
+  } else {
+    info(`${tickets.length} tickets found`);
+  }
 
 
   // Log on to JIRA
@@ -84,12 +96,14 @@ async function generateMarkdown() {
   const summaries = {};
 
   for (const ticket of tickets) {
-    console.log('--> Fetching ticket ' + ticket)
+    info('Fetching ticket ' + ticket)
     const issue = await jira.findIssue(ticket);
     summaries[ticket] = _.get(issue, 'fields.summary', '');
   }
 
   // Output a markdown list
+
+  info('generating markdown');
 
   const ticketList = _.map(tickets, ticket => `- [${ticket}](https://jira.crossroads.org.hk/browse/${ticket}) ${summaries[ticket]}`).join('\n');
   return `
@@ -111,7 +125,7 @@ ${ticketList}
     console.log('----------------------------------------------------------------------------');
     process.exit(0);
   } catch (e) {
-    console.log(e.toString());
+    error(e.toString());
     process.exit(1);
   }
 })();
