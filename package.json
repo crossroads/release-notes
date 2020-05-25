@@ -1,6 +1,6 @@
 {
   "name": "@goodcity/release-notes",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Release note generator",
   "main": "index.js",
   "scripts": {
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/patrixr/release-notes.git"
+    "url": "git+https://github.com/crossroads/release-notes.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/patrixr/release-notes/issues"
+    "url": "https://github.com/crossroads/release-notes/issues"
   },
-  "homepage": "https://github.com/patrixr/release-notes#readme",
+  "homepage": "https://github.com/crossroads/release-notes#readme",
   "dependencies": {
     "debug": "^4.1.1",
     "jira-client": "^6.17.0",
