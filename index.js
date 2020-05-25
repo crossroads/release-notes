@@ -56,7 +56,7 @@ async function generateMarkdown() {
       --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' \
       --abbrev-commit \
       --date=relative \
-      live..master
+      origin/live..origin/master
   `);
 
   // Extract the Ticket numbers from the text
