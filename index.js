@@ -2,14 +2,48 @@
 
 process.env.DEBUG = '*';
 
+const { program }   = require('commander');
 const _             = require('lodash');
 const JiraClient    = require('jira-client');
 const { execSync }  = require('child_process');
 const readline      = require('readline');
 const { Writable }  = require('stream');
+const fs            = require('fs');
+const path          = require('path');
 const info          = require('debug')('goodcity');
 const notify        = require('debug')('input');
 const error         = require('debug')('error');
+const { version }   = require('./package.json');
+const markdownpdf   = require("markdown-pdf") 
+
+program
+  .version(version)
+  .option('-p, --pdf', 'ouputs to pdf')
+
+program.parse(process.argv);
+
+let repoName = "";
+if (fs.existsSync(path.join(process.cwd(), 'package.json'))) {
+  const { name, version, repository } = require(path.join(process.cwd(), 'package.json'));
+  repoName = `${_.capitalize(name)} v${version}`
+}
+
+// -------------------------------
+// -- Output Helpers
+// -------------------------------
+
+const toPDF = (markdown, filepath = './release-notes.pdf') => {
+  return new Promise((good, bad) => {
+    markdownpdf().from.string(markdown).to(filepath, (error) => {
+      if (error) {
+        bad(error);
+      } else {
+        good(filepath);
+      }
+    });
+  });
+};
+
 
 // -------------------------------
 // -- Input Helpers
@@ -43,6 +77,10 @@ const question = (text, defaultAnswer, opts = {}) => new Promise((done) => {
 // -------------------------------
 
 async function generateMarkdown() {
+  info('Reading repo');
+
+  const repoUrl = execSync('git config --get remote.origin.url');
+
   info('Running git fetch')
 
   execSync(`git fetch`);
@@ -85,7 +123,7 @@ async function generateMarkdown() {
     username: jiraUsername,
     password: jiraPassword,
     apiVersion: '2',
-    strictSSL: true
+    strictSSL: false
   });
 
 
@@ -96,7 +134,7 @@ async function generateMarkdown() {
   for (const ticket of tickets) {
     info('Fetching ticket ' + ticket)
     const issue = await jira.findIssue(ticket);
-    summaries[ticket] = _.get(issue, 'fields.summary', '');
+    summaries[ticket] = _.trim(_.get(issue, 'fields.summary', ''));
   }
 
   // Output a markdown list
@@ -105,7 +143,12 @@ async function generateMarkdown() {
 
   const ticketList = _.map(tickets, ticket => `- [${ticket}](https://jira.crossroads.org.hk/browse/${ticket}) ${summaries[ticket]}`).join('\n');
   return `
-# Tickets affected by this release
+# Release notes ${repoName ? '- ' + repoName  : ''}
+
+**Generated on:** ${new Date().toLocaleString()}
+**Repository:** \`${repoUrl}\`
+
+## Tickets affected by this release
 
 ${ticketList}
 `;
@@ -118,11 +161,18 @@ ${ticketList}
 (async function () {
   try {
     const markdown = await generateMarkdown();
-    console.log('----------------------------------------------------------------------------');
-    console.log(markdown);
-    console.log('----------------------------------------------------------------------------');
+    if (program.pdf) {
+      info('generating pdf');
+      const filepath = await toPDF(markdown);
+      info(`File ${filepath} generated`);
+    } else {
+      console.log('----------------------------------------------------------------------------');
+      console.log(markdown);
+      console.log('----------------------------------------------------------------------------');
+    }
     process.exit(0);
   } catch (e) {
+    console.log(e);
     error(e.toString());
     process.exit(1);
   }
