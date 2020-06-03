@@ -1,6 +1,6 @@
 {
   "name": "@goodcity/release-notes",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Release note generator",
   "main": "index.js",
   "scripts": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/crossroads/release-notes#readme",
   "dependencies": {
+    "clipboardy": "^2.3.0",
     "commander": "^5.1.0",
     "debug": "^4.1.1",
     "jira-client": "^6.17.0",

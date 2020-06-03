@@ -15,10 +15,12 @@ const notify        = require('debug')('input');
 const error         = require('debug')('error');
 const { version }   = require('./package.json');
 const markdownpdf   = require("markdown-pdf") 
+const clipboardy    = require('clipboardy');
 
 program
   .version(version)
   .option('-p, --pdf', 'ouputs to pdf')
+  .option('-c, --clipboard', 'copies the markdown to your clipboard')
 
 program.parse(process.argv);
 
@@ -170,6 +172,12 @@ ${ticketList}
       console.log(markdown);
       console.log('----------------------------------------------------------------------------');
     }
+
+    if (program.clipboard) {
+      clipboardy.writeSync(markdown);
+      info(`Output copied to the clipboard`);
+    }
+
     process.exit(0);
   } catch (e) {
     console.log(e);
