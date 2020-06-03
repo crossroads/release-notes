@@ -13,11 +13,15 @@ const path          = require('path');
 const info          = require('debug')('goodcity');
 const notify        = require('debug')('input');
 const error         = require('debug')('error');
-const { version }   = require('./package.json');
 const markdownpdf   = require("markdown-pdf") 
 const clipboardy    = require('clipboardy');
+const {
+  version,
+  name
+} = require('./package.json');
 
 program
+  .name(name)
   .version(version)
   .option('-p, --pdf', 'ouputs to pdf')
   .option('-c, --clipboard', 'copies the markdown to your clipboard')

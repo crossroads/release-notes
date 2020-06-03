@@ -15,4 +15,17 @@ It will
 
 `npx @goodcity/release-notes`
 
+### Options
+
+```bash
+$> npx @goodcity/release-notes --help
+
+Usage: @goodcity/release-notes [options]
+
+Options:
+  -V, --version    output the version number
+  -p, --pdf        ouputs to pdf
+  -c, --clipboard  copies the markdown to your clipboard
+  -h, --help       display help for command
+```
 
