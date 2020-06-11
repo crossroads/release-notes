@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-process.env.DEBUG = '*';
+process.env.DEBUG = '*,-follow-redirects';
 
 const { program }   = require('commander');
 const _             = require('lodash');
@@ -8,13 +8,13 @@ const JiraClient    = require('jira-client');
 const { execSync }  = require('child_process');
 const readline      = require('readline');
 const { Writable }  = require('stream');
-const fs            = require('fs');
-const path          = require('path');
 const info          = require('debug')('goodcity');
 const notify        = require('debug')('input');
 const error         = require('debug')('error');
 const markdownpdf   = require("markdown-pdf") 
 const clipboardy    = require('clipboardy');
+const repo          = require('./lib/repo');
+const mailer        = require('./lib/mailer');
 const {
   version,
   name
@@ -25,20 +25,20 @@ program
   .version(version)
   .option('-p, --pdf', 'ouputs to pdf')
   .option('-c, --clipboard', 'copies the markdown to your clipboard')
+  .option('-h, --head <head>', 'The head ref or source branch', 'origin/master')
+  .option('-b, --base <base>', 'The base ref or target branch', 'origin/live')
+  .option('--email-to <email>', 'Recipients for the release notes')
 
 program.parse(process.argv);
 
-let repoName = "";
-if (fs.existsSync(path.join(process.cwd(), 'package.json'))) {
-  const { name, version, repository } = require(path.join(process.cwd(), 'package.json'));
-  repoName = `${_.capitalize(name)} v${version}`
-}
+const REPO_NAME   = `${repo.getRepoName()} v${repo.getRepoVersion()}`
+const OUTPUT_PDF  = `./release-${REPO_NAME.replace(/ /g, '-')}.pdf`
 
 // -------------------------------
 // -- Output Helpers
 // -------------------------------
 
-const toPDF = (markdown, filepath = './release-notes.pdf') => {
+const toPDF = (markdown, filepath) => {
   return new Promise((good, bad) => {
     markdownpdf().from.string(markdown).to(filepath, (error) => {
       if (error) {
@@ -98,7 +98,7 @@ async function generateMarkdown() {
       --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset' \
       --abbrev-commit \
       --date=relative \
-      origin/live..origin/master
+      ${program.base}..${program.head}
   `);
 
   // Extract the Ticket numbers from the text
@@ -120,8 +120,8 @@ async function generateMarkdown() {
 
   // Log on to JIRA
 
-  const jiraUsername = await question('JIRA Username: ');
-  const jiraPassword = await question('JIRA Password:', '', { muted: true })
+  const jiraUsername = process.env.JIRA_USERNAME || await question('JIRA Username: ');
+  const jiraPassword = process.env.JIRA_PASSWORD ||  await question('JIRA Password:', '', { muted: true })
 
   const jira = new JiraClient({
     protocol: 'https',
@@ -139,8 +139,16 @@ async function generateMarkdown() {
 
   for (const ticket of tickets) {
     info('Fetching ticket ' + ticket)
-    const issue = await jira.findIssue(ticket);
-    summaries[ticket] = _.trim(_.get(issue, 'fields.summary', ''));
+    try {
+      const issue = await jira.findIssue(ticket);
+      summaries[ticket] = _.trim(_.get(issue, 'fields.summary', ''));
+    } catch (e) {
+      if (e.statusCode !== 404) {
+        throw e;
+      } else {
+        summaries[ticket] = '_Ticket information unavailable_'
+      }
+    }
   }
 
   // Output a markdown list
@@ -149,9 +157,10 @@ async function generateMarkdown() {
 
   const ticketList = _.map(tickets, ticket => `- [${ticket}](https://jira.crossroads.org.hk/browse/${ticket}) ${summaries[ticket]}`).join('\n');
   return `
-# Release notes ${repoName ? '- ' + repoName  : ''}
+# Release notes ${REPO_NAME}
 
 **Generated on:** ${new Date().toLocaleString()}
+
 **Repository:** \`${repoUrl}\`
 
 ## Tickets affected by this release
@@ -169,7 +178,7 @@ ${ticketList}
     const markdown = await generateMarkdown();
     if (program.pdf) {
       info('generating pdf');
-      const filepath = await toPDF(markdown);
+      const filepath = await toPDF(markdown, OUTPUT_PDF);
       info(`File ${filepath} generated`);
     } else {
       console.log('----------------------------------------------------------------------------');
@@ -180,6 +189,14 @@ ${ticketList}
     if (program.clipboard) {
       clipboardy.writeSync(markdown);
       info(`Output copied to the clipboard`);
+    }
+
+    if (program.emailTo) {
+      info(`Emailing the release notes`);
+      await mailer.sendMarkdown(markdown, {
+        to: program.emailTo,
+        subject: `Release notes ${REPO_NAME}`
+      })
     }
 
     process.exit(0);

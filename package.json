@@ -1,6 +1,6 @@
 {
   "name": "@goodcity/release-notes",
-  "version": "1.0.8",
+  "version": "1.0.7",
   "description": "Release note generator",
   "main": "index.js",
   "scripts": {
@@ -20,11 +20,14 @@
   },
   "homepage": "https://github.com/crossroads/release-notes#readme",
   "dependencies": {
+    "@sendgrid/mail": "^7.2.0",
     "clipboardy": "^2.3.0",
     "commander": "^5.1.0",
     "debug": "^4.1.1",
     "jira-client": "^6.17.0",
     "lodash": "^4.17.15",
-    "markdown-pdf": "^10.0.0"
+    "markdown-pdf": "^10.0.0",
+    "markdown-to-html": "0.0.13",
+    "showdown": "^1.9.1"
   }
 }
