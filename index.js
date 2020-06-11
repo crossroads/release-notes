@@ -27,10 +27,11 @@ program
   .option('-b, --base <base>', 'The base ref or target branch', 'origin/live')
   .option('--email-to <email>', 'Recipients for the release notes')
   .option('--email-subject <subject>', 'Subject of the email')
+  .option('--app-name <name>', 'Name of the app')
 
 program.parse(process.argv);
 
-const REPO_NAME   = `${repo.getRepoName()} v${repo.getRepoVersion()}`
+const REPO_NAME   = program.appName || `${repo.getRepoName()} v${repo.getRepoVersion()}`
 const OUTPUT_PDF  = `./release-${REPO_NAME.replace(/ /g, '-')}.pdf`
 
 // -------------------------------
@@ -146,7 +147,7 @@ ${ticketList}
       info(`Emailing the release notes`);
       await mailer.sendMarkdown(markdown, {
         to: program.emailTo,
-        subject: `${program.emailSubject || 'Release notes'} - ${REPO_NAME}`
+        subject: `[${REPO_NAME}] ${program.emailSubject || 'Release notes'}`
       })
     }
 
