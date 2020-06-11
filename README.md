@@ -23,9 +23,13 @@ $> npx @goodcity/release-notes --help
 Usage: @goodcity/release-notes [options]
 
 Options:
-  -V, --version    output the version number
-  -p, --pdf        ouputs to pdf
-  -c, --clipboard  copies the markdown to your clipboard
-  -h, --help       display help for command
+  -V, --version              output the version number
+  -p, --pdf                  ouputs to pdf
+  -c, --clipboard            copies the markdown to your clipboard
+  -h, --head <head>          The head ref or source branch (default: "origin/master")
+  -b, --base <base>          The base ref or target branch (default: "origin/live")
+  --email-to <email>         Recipients for the release notes
+  --email-subject <subject>  Subject of the email
+  --help                     display help for command
 ```
 
