@@ -28,6 +28,7 @@ program
   .option('-h, --head <head>', 'The head ref or source branch', 'origin/master')
   .option('-b, --base <base>', 'The base ref or target branch', 'origin/live')
   .option('--email-to <email>', 'Recipients for the release notes')
+  .option('--email-subject <subject>', 'Subject of the email')
 
 program.parse(process.argv);
 
@@ -195,7 +196,7 @@ ${ticketList}
       info(`Emailing the release notes`);
       await mailer.sendMarkdown(markdown, {
         to: program.emailTo,
-        subject: `Release notes ${REPO_NAME}`
+        subject: `${program.emailSubject || 'Release notes'} - ${REPO_NAME}`
       })
     }
 
