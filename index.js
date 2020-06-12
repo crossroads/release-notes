@@ -80,7 +80,7 @@ async function generateMarkdown() {
 
   const jira = new JiraClient({
     protocol: 'https',
-    host: 'jira.crossroads.org.hk',
+    host: process.env.JIRA_HOST || 'jira.crossroads.org.hk',
     username: jiraUsername,
     password: jiraPassword,
     apiVersion: '2',
