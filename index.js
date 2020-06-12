@@ -44,9 +44,9 @@ async function generateMarkdown() {
 
   const repoUrl = execSync('git config --get remote.origin.url');
 
-  info('Running git fetch')
+  info('Running git fetch --all --depth=1000')
 
-  execSync(`git fetch --all`);
+  execSync(`git fetch --all --depth=1000`);
 
   info('Reading unreleased commits');
 
