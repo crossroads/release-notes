@@ -46,7 +46,7 @@ async function generateMarkdown() {
 
   info('Running git fetch')
 
-  execSync(`git fetch`);
+  execSync(`git fetch --all`);
 
   info('Reading unreleased commits');
 
