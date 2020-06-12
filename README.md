@@ -71,6 +71,7 @@ Options:
   --email-to <email>         Recipients for the release notes
   --email-subject <subject>  Subject of the email
   --app-name <name>          Name of the app
+  --jira-code <code>         Jira ticket code (default: "GCW")
   --help                     display help for command
 ```
 

@@ -28,6 +28,7 @@ program
   .option('--email-to <email>', 'Recipients for the release notes')
   .option('--email-subject <subject>', 'Subject of the email')
   .option('--app-name <name>', 'Name of the app')
+  .option('--jira-code <code>', 'Jira ticket code', 'GCW')
 
 program.parse(process.argv);
 
@@ -59,10 +60,12 @@ async function generateMarkdown() {
 
   // Extract the Ticket numbers from the text
 
+  const ticketRegex = new RegExp(`(${program.jiraCode}-\\d+)`);
+
   const tickets = _.chain(logs)
     .split('\n')
-    .filter(str => /GCW-\d+/.test(str))
-    .map(str => /(GCW-\d+)/.exec(str)[1])
+    .filter(str => ticketRegex.test(str))
+    .map(str => ticketRegex.exec(str)[1])
     .uniq()
     .value();
 
