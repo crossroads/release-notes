@@ -52,8 +52,8 @@ The tool can be run without any configurations, but specific JIRA and SENDGRID i
 |------------------|------------------------|---------------------------------|
 | SENDGRID_API_KEY | null                   | API Key used for mailing        |
 | JIRA_HOST        | jira.crossroads.org.hk | The JIRA endpoint to connect to |
-| JIRA_USERNAME    | <input request>        | The JIRA username               |
-| JIRA_PASSWORD    | <input request>        | The JIRA passworld              |
+| JIRA_USERNAME    | _input request_        | The JIRA username               |
+| JIRA_PASSWORD    | _input request_        | The JIRA passworld              |
 
 ### Options Overview
 
