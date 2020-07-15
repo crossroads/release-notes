@@ -44,9 +44,15 @@ async function generateMarkdown() {
 
   const repoUrl = execSync('git config --get remote.origin.url');
 
-  info('Running git fetch --unshallow')
+  info('Checking if repo is shallow');
 
-  execSync(`git fetch --unshallow`);
+  const isShallow = String(execSync('git rev-parse --is-shallow-repository')) === 'true';
+
+  const fetchArgs = isShallow ? '--unshallow' : '';
+
+  info(`Running git fetch ${fetchArgs}`)
+
+  execSync(`git fetch ${fetchArgs}`);
 
   info('Reading unreleased commits');
 
