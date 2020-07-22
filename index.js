@@ -29,6 +29,7 @@ program
   .option('--email-subject <subject>', 'Subject of the email')
   .option('--app-name <name>', 'Name of the app')
   .option('--jira-code <code>', 'Jira ticket code', 'GCW')
+  .option('--unshallow', 'Unshallows a shallow repository to read the commites')
 
 program.parse(process.argv);
 
@@ -44,11 +45,7 @@ async function generateMarkdown() {
 
   const repoUrl = execSync('git config --get remote.origin.url');
 
-  info('Checking if repo is shallow');
-
-  const isShallow = String(execSync('git rev-parse --is-shallow-repository')) === 'true';
-
-  const fetchArgs = isShallow ? '--unshallow' : '';
+  const fetchArgs = program.unshallow ? '--unshallow' : '';
 
   info(`Running git fetch ${fetchArgs}`)
 

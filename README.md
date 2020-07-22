@@ -72,6 +72,7 @@ Options:
   --email-subject <subject>  Subject of the email
   --app-name <name>          Name of the app
   --jira-code <code>         Jira ticket code (default: "GCW")
+  --unshallow                Unshallows a shallow repository before reading the commites
   --help                     display help for command
 ```
 
