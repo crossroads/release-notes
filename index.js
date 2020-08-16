@@ -8,6 +8,7 @@ const repo          = require('./lib/repo');
 const mailer        = require('./lib/mailer');
 const { question }  = require('./lib/input');
 const Markdown      = require('./lib/markdown');
+const path          = require('path');
 
 /**
  * @typedef GenerationOptions
@@ -153,7 +154,7 @@ async function execute(opts = {}) {
   if (opts.pdf) {
     info('generating pdf');
     await markdown.toPDF(OUTPUT_PDF);
-    results.pdf = OUTPUT_PDF;
+    results.pdf = path.resolve(OUTPUT_PDF);
     info(`File ${OUTPUT_PDF} generated`);
   } else {
     markdown.dump();
